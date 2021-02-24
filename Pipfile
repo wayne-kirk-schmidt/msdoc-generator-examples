@@ -1,0 +1,18 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pyinstaller = "*"
+
+[packages]
+tzlocal = "*"
+pyinstaller = "*"
+requests = "*"
+pathlib = "*"
+pandas = "*"
+datetime = "*"
+argparse = "*"
+python-pptx = "*"
+xlsxwriter = "*"
