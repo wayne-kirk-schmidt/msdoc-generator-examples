@@ -4,16 +4,16 @@
 """
 Explanation: A data driven ability to create a powerpoint file
 Usage:
-    $ ms-ppt-gen  [ options ]
+    $ msgen_ppt  [ options ]
 Style:
     Google Python Style Guide:
     http://google.github.io/styleguide/pyguide.html
-    @name           ms-ppt-gen
+    @name           msgen_ppt
     @version        1.0.0
     @author-name    Wayne Schmidt
     @author-email   wschmidt@sumologic.com
-    @license-name   GNU GPL
-    @license-url    http://www.gnu.org/licenses/gpl.html
+    @license-name   APACHE 2.0
+    @license-url    http://www.apache.org/licenses/LICENSE-2.0
 """
 
 __version__ = 1.0
@@ -219,7 +219,7 @@ TMPLPATH = ARGS.template
 if os.path.isdir(TMPLPATH):
     TMPLNAME = glob.glob(os.path.join(os.path.abspath(TMPLPATH), '*.pptx'))[0]
 else:
-    print('Path not accessible:: {} '.format(TMPLPATH))
+    print(f'Path not accessible:: {TMPLPATH} ')
     sys.exit()
 
 USERPATH = ARGS.userdir
@@ -228,7 +228,7 @@ if os.path.isdir(USERPATH):
     IMG_USER = os.path.basename(glob.glob(os.path.join(os.path.abspath(USERPATH), 'logo.*'))[0])
     sys.path.append(os.path.abspath(USERPATH))
 else:
-    print('Path not accessible:: {} '.format(USERPATH))
+    print(f'Path not accessible:: {USERPATH}')
     sys.exit()
 
 SUMOPATH = ARGS.sumodir
@@ -237,7 +237,7 @@ if os.path.isdir(SUMOPATH):
     IMG_SUMO = os.path.basename(glob.glob(os.path.join(os.path.abspath(SUMOPATH), 'logo.*'))[0])
     sys.path.append(os.path.abspath(SUMOPATH))
 else:
-    print('Path not accessible:: {} '.format(SUMOPATH))
+    print(f'Path not accessible:: {SUMOPATH}')
     sys.exit()
 
 PLANPATH = ARGS.outputdir
@@ -246,14 +246,14 @@ if os.path.isdir(PLANPATH):
     OUTPUTFILE = (os.path.join(os.path.abspath(PLANPATH), CSPFILE))
     sys.path.append(os.path.abspath(PLANPATH))
 else:
-    print('Path not accessible:: {} '.format(PLANPATH))
+    print(f'Path not accessible:: {PLANPATH}')
     sys.exit()
 
 CFGPATH = ARGS.configdir
 if os.path.isdir(CFGPATH):
     sys.path.append(os.path.abspath(CFGPATH))
 else:
-    print('Path not accessible:: {} '.format(CFGPATH))
+    print(f'Path not accessible:: {CFGPATH}')
     sys.exit()
 
 

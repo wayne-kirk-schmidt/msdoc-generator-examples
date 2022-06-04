@@ -4,16 +4,16 @@
 """
 Explanation: Group based example of Excel Spreadsheet
 Usage:
-    $ python ms-xls-gen-group [ options ]
+    $ python msgen_xls_grp [ options ]
 Style:
     Google Python Style Guide:
     http://google.github.io/styleguide/pyguide.html
-    @name           ms-xls-gen-group
+    @name           msgen_xls_grp
     @version        1.0.0
     @author-name    Wayne Schmidt
     @author-email   wschmidt@sumologic.com
-    @license-name   GNU GPL
-    @license-url    http://www.gnu.org/licenses/gpl.html
+    @license-name   APACHE 2.0
+    @license-url    http://www.apache.org/licenses/LICENSE-2.0
 """
 
 __version__ = 1.0
