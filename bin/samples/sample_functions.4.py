@@ -2,13 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Explanation: A data driven ability to create a powerpoint file
-Usage:
-    $ msgen_ppt  [ options ]
 Style:
     Google Python Style Guide:
     http://google.github.io/styleguide/pyguide.html
-    @name           msgen_ppt
+    @name           sample_functions
     @version        1.0.0
     @author-name    Wayne Schmidt
     @author-email   wschmidt@sumologic.com
@@ -34,24 +31,7 @@ from pptx.util import Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
 
-### from pptx.enum.dml import MSO_THEME_COLOR
-### from pptx.enum.text import MSO_AUTO_SIZE
-
 sys.dont_write_bytecode = 1
-
-PARSER = argparse.ArgumentParser(description="""
-Sample way to build a Powerpoint slide from CSV files
-""")
-
-PARSER.add_argument('-n', metavar='<client>', dest='client', help='specify client')
-PARSER.add_argument('-t', metavar='<template>', dest='template', help='specify CSP template')
-PARSER.add_argument('-s', metavar='<sumodir>', dest='sumodir', help='specify sumo files')
-PARSER.add_argument('-u', metavar='<userdir>', dest='userdir', help='specify user files')
-PARSER.add_argument('-c', metavar='<configdir>', dest='configdir', help='specify configdir')
-PARSER.add_argument('-o', metavar='<outputdir>', dest='outputdir', help='specify outputdir')
-
-ARGS = PARSER.parse_args()
-CLIENTNAME = ARGS.client
 
 NOW = datetime.datetime.now()
 TSTAMP = NOW.strftime("%B %-d, %Y")
@@ -62,13 +42,13 @@ STATUS['IN_PROGRESS'] = 0xFF, 0x99, 0x00
 STATUS['DELAYED'] = 0xFF, 0x00, 0x00
 STATUS['NEW'] = 0x99, 0xCC, 0xFF
 
-MILESTONE = {}
-MILESTONE['VALUE'] = 0x00, 0xFF, 0x00
-MILESTONE['CONTENT'] = 0x00, 0xFF, 0x00
-MILESTONE['ONBOARD'] = 0xFF, 0xFF, 0x00
-MILESTONE['REVIEW'] = 0xFF, 0xFF, 0x00
-MILESTONE['CHECKUP'] = 0xFF, 0x99, 0x00
-MILESTONE['CSP'] = 0xFF, 0x99, 0x00
+WORKSTREAM = {}
+WORKSTREAM['BVAROI'] = 0x00, 0xFF, 0x00
+WORKSTREAM['CONTENT'] = 0x00, 0xFF, 0x00
+WORKSTREAM['ONBOARD'] = 0xFF, 0xFF, 0x00
+WORKSTREAM['REVIEW'] = 0xFF, 0xFF, 0x00
+WORKSTREAM['CHECKUP'] = 0xFF, 0x99, 0x00
+WORKSTREAM['AUDIT'] = 0xFF, 0x99, 0x00
 
 def add_front_logo(path, img, left, top, width):
     """
@@ -102,7 +82,6 @@ def add_front_title(text, left, top, width, height):
 def add_support_table(cfgpath, userfile, left, top, width, height):
     """
     This will add a support table based on a CSV file.
-    Eventually this will be replaced by a feed from Salesforce
     """
     table_x = Inches(left)
     table_y = Inches(top)
@@ -215,107 +194,67 @@ def cleanup_slides(prs):
         prs.part.drop_rel(r_id)
         del prs.slides._sldIdLst[-1]
 
-TMPLPATH = ARGS.template
-if os.path.isdir(TMPLPATH):
-    TMPLNAME = glob.glob(os.path.join(os.path.abspath(TMPLPATH), '*.pptx'))[0]
-else:
-    print(f'Path not accessible:: {TMPLPATH} ')
-    sys.exit()
+def main():
+    TMPLPATH = ARGS.template
+    USERPATH = ARGS.userdir
+    PLANPATH = ARGS.outputdir
 
-USERPATH = ARGS.userdir
-if os.path.isdir(USERPATH):
-    CSV_USER = os.path.basename(glob.glob(os.path.join(os.path.abspath(USERPATH), 'user.*'))[0])
-    IMG_USER = os.path.basename(glob.glob(os.path.join(os.path.abspath(USERPATH), 'logo.*'))[0])
-    sys.path.append(os.path.abspath(USERPATH))
-else:
-    print(f'Path not accessible:: {USERPATH}')
-    sys.exit()
+    PRESENTATION = Presentation(TMPLNAME)
+    BLANK_SLIDE = PRESENTATION.slide_layouts[3]
+    SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
+    cleanup_slides(PRESENTATION)
 
-SUMOPATH = ARGS.sumodir
-if os.path.isdir(SUMOPATH):
-    CSV_SUMO = os.path.basename(glob.glob(os.path.join(os.path.abspath(SUMOPATH), 'user.*'))[0])
-    IMG_SUMO = os.path.basename(glob.glob(os.path.join(os.path.abspath(SUMOPATH), 'logo.*'))[0])
-    sys.path.append(os.path.abspath(SUMOPATH))
-else:
-    print(f'Path not accessible:: {SUMOPATH}')
-    sys.exit()
+    add_front_logo(USERPATH, IMG_USER, 9, .5, 2)
+    add_front_title(CLIENTNAME, 11, .5, 2, 1)
 
-PLANPATH = ARGS.outputdir
-if os.path.isdir(PLANPATH):
-    CSPFILE = 'CSP.' + CLIENTNAME + '.pptx'
-    OUTPUTFILE = (os.path.join(os.path.abspath(PLANPATH), CSPFILE))
-    sys.path.append(os.path.abspath(PLANPATH))
-else:
-    print(f'Path not accessible:: {PLANPATH}')
-    sys.exit()
+    SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
+    TITLE_TEXT = "Contact List - " + TSTAMP
 
-CFGPATH = ARGS.configdir
-if os.path.isdir(CFGPATH):
-    sys.path.append(os.path.abspath(CFGPATH))
-else:
-    print(f'Path not accessible:: {CFGPATH}')
-    sys.exit()
+    add_title(TITLE_TEXT, 0, 0, 12, 1)
+    add_logo(USERPATH, IMG_USER, 10.5, 1.5, 2)
+    add_support_table(USERPATH, CSV_USER, 1, 1.5, 9, .5)
 
+    SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
+    TITLE_TEXT = "Business Value Review - " + TSTAMP
+    add_support_table(CFGPATH, "bizvalue.background.csv", 1, 1.5, 12, .5)
+    add_support_table(CFGPATH, "bizalue.measures.csv", 1, 4, 12, .5)
+    add_title(TITLE_TEXT, 0, 0, 12, 1)
 
-PRESENTATION = Presentation(TMPLNAME)
-BLANK_SLIDE = PRESENTATION.slide_layouts[3]
-SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
-cleanup_slides(PRESENTATION)
+    SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
+    TITLE_TEXT = "Milestone Status - " + TSTAMP
+    add_support_table(CFGPATH, "plan.status.csv", 11.75, 0, 1.5, .5)
+    add_support_table(CFGPATH, "plan.milestone-status.csv", .5, 2.25, 12.5, .5)
+    add_title(TITLE_TEXT, 0, 0, 12, 1)
 
-add_front_logo(USERPATH, IMG_USER, 9, .5, 2)
-add_front_title(CLIENTNAME, 11, .5, 2, 1)
+    SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
+    TITLE_TEXT = "Milestone Planner - " + TSTAMP
+    add_support_table(CFGPATH, "plan.status.csv", 11.75, 0, 1.5, .5)
+    add_support_table(CFGPATH, "plan.milestone-planner.csv", .5, 2.25, 12, .5)
+    add_title(TITLE_TEXT, 0, 0, 12, 1)
 
-SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
-TITLE_TEXT = "Contact List - " + TSTAMP
+    SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
+    TITLE_TEXT = "Milestone Schedule - " + TSTAMP
+    add_support_table(CFGPATH, "plan.status.csv", 11.75, 0, 1.5, .5)
+    add_support_table(CFGPATH, "plan.milestone-schedule.csv", .1, 2.25, 12.7, .5)
+    add_title(TITLE_TEXT, 0, 0, 12, 1)
 
-add_title(TITLE_TEXT, 0, 0, 12, 1)
-add_logo(USERPATH, IMG_USER, 10.5, 1.5, 2)
-add_support_table(USERPATH, CSV_USER, 1, 1.5, 9, .5)
+    SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
+    TITLE_TEXT = "Customer Issues - " + TSTAMP
+    add_support_table(CFGPATH, "plan.status.csv", 11.75, 0, 1.5, .5)
+    add_support_table(CFGPATH, "account.issues.csv", .5, 2.5, 12, .5)
+    add_title(TITLE_TEXT, 0, 0, 12, 1)
 
-add_logo(SUMOPATH, IMG_SUMO, 10.5, 4, 2)
-add_support_table(SUMOPATH, CSV_SUMO, 1, 4, 9, .5)
+    SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
+    TITLE_TEXT = "Customer Requests - " + TSTAMP
+    add_support_table(CFGPATH, "plan.status.csv", 11.75, 0, 1.5, .5)
+    add_support_table(CFGPATH, "account.requests.csv", .5, 2.5, 12, .5)
+    add_title(TITLE_TEXT, 0, 0, 12, 1)
 
-SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
-TITLE_TEXT = "Business Value Review - " + TSTAMP
-add_support_table(CFGPATH, "bizvalue.background.csv", 1, 1.5, 12, .5)
-add_support_table(CFGPATH, "bizalue.measures.csv", 1, 4, 12, .5)
-add_title(TITLE_TEXT, 0, 0, 12, 1)
+    SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
+    TITLE_TEXT = "Customer Meeting Notes - " + TSTAMP
+    add_support_table(CFGPATH, "meeting.attendees.csv", 10, 0, 3.25, .5)
+    add_support_table(CFGPATH, "meeting.updates.csv", .5, 2.5, 12, .5)
+    add_support_table(CFGPATH, "meeting.actionitems.csv", .5, 5, 12, .5)
+    add_title(TITLE_TEXT, 0, 0, 12, 1)
 
-SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
-TITLE_TEXT = "Milestone Status - " + TSTAMP
-add_support_table(CFGPATH, "plan.status.csv", 11.75, 0, 1.5, .5)
-add_support_table(CFGPATH, "plan.milestone-status.csv", .5, 2.25, 12.5, .5)
-add_title(TITLE_TEXT, 0, 0, 12, 1)
-
-SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
-TITLE_TEXT = "Milestone Planner - " + TSTAMP
-add_support_table(CFGPATH, "plan.status.csv", 11.75, 0, 1.5, .5)
-add_support_table(CFGPATH, "plan.milestone-planner.csv", .5, 2.25, 12, .5)
-add_title(TITLE_TEXT, 0, 0, 12, 1)
-
-SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
-TITLE_TEXT = "Milestone Schedule - " + TSTAMP
-add_support_table(CFGPATH, "plan.status.csv", 11.75, 0, 1.5, .5)
-add_support_table(CFGPATH, "plan.milestone-schedule.csv", .1, 2.25, 12.7, .5)
-add_title(TITLE_TEXT, 0, 0, 12, 1)
-
-SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
-TITLE_TEXT = "Customer Issues - " + TSTAMP
-add_support_table(CFGPATH, "plan.status.csv", 11.75, 0, 1.5, .5)
-add_support_table(CFGPATH, "account.issues.csv", .5, 2.5, 12, .5)
-add_title(TITLE_TEXT, 0, 0, 12, 1)
-
-SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
-TITLE_TEXT = "Customer Requests - " + TSTAMP
-add_support_table(CFGPATH, "plan.status.csv", 11.75, 0, 1.5, .5)
-add_support_table(CFGPATH, "account.requests.csv", .5, 2.5, 12, .5)
-add_title(TITLE_TEXT, 0, 0, 12, 1)
-
-SLIDE = PRESENTATION.slides.add_slide(BLANK_SLIDE)
-TITLE_TEXT = "Customer Meeting Notes - " + TSTAMP
-add_support_table(CFGPATH, "meeting.attendees.csv", 10, 0, 3.25, .5)
-add_support_table(CFGPATH, "meeting.updates.csv", .5, 2.5, 12, .5)
-add_support_table(CFGPATH, "meeting.actionitems.csv", .5, 5, 12, .5)
-add_title(TITLE_TEXT, 0, 0, 12, 1)
-
-PRESENTATION.save(OUTPUTFILE)
+    PRESENTATION.save(OUTPUTFILE)

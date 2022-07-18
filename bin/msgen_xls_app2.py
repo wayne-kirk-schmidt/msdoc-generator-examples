@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 """
-Explanation: Sample XLS report generator
+Explanation: Group based example of Excel Spreadsheet
 Usage:
-    $ python msgen_xls_app [ options ]
+    $ python msgen_xls_app2 [ options ]
 Style:
     Google Python Style Guide:
     http://google.github.io/styleguide/pyguide.html
-    @name           msgen_xls_app
+    @name           msgen_xls_app2
     @version        1.0.0
     @author-name    Wayne Schmidt
     @author-email   wschmidt@sumologic.com
@@ -32,7 +32,7 @@ pandas.io.formats.excel.header_style = None
 sys.dont_write_bytecode = 1
 
 PARSER = argparse.ArgumentParser(description="""
-Sample script to build a powerpoint from CSV items
+Sample of the XLS spreadsheet
 """)
 
 PARSER.add_argument('-c', metavar='<clientdata>', dest='clientdata', help='specify client data')
@@ -47,23 +47,7 @@ TSTAMP = NOW.strftime("%B %-d, %Y")
 SUMOURL = "https://logo.clearbit.com/www.sumologic.com"
 SUMOIMG = io.BytesIO(requests.get(SUMOURL, stream = True).raw.read())
 
-dataframe = pandas.read_csv(ARGS.clientdata)
-dataframe.fillna(0, inplace=True)
-
-transposed = dataframe.transpose()
-transposed.reset_index(level=0, inplace=True)
-my_rows = transposed.shape[0]
-
-START = 0
-OFFSET = 8
-final = my_rows
-
 workbook = xlsxwriter.Workbook(ARGS.outputfile)
-
-worksheet = workbook.add_worksheet('Client_Info')
-worksheet.set_column(0,10,30)
-
-worksheet.insert_image('A1', SUMOURL, {'image_data': SUMOIMG})
 
 cell_formatV = workbook.add_format()
 cell_formatV.set_font_name('Calibri')
@@ -81,17 +65,12 @@ cell_formatK.set_bg_color('#333399')
 cell_formatK.set_font_color('white')
 cell_formatK.set_border()
 
-for my_row in range(START,my_rows,1):
-    row = my_row + OFFSET
-    key = transposed['index'][my_row]
-    value = transposed[0][my_row]
-    worksheet.write(row, 0, key, cell_formatK)
-    worksheet.write(row, 1, value, cell_formatV)
-
-worksheet = workbook.add_worksheet('AppFinder_Data')
+worksheet = workbook.add_worksheet('Data')
 worksheet.set_column(0,10,30)
 
 dataframeApp = pandas.read_csv(ARGS.reportdata)
+dataframeApp.fillna(0, inplace=True)
+
 
 START = 0
 COL = START
@@ -108,7 +87,7 @@ for (columnName, columnData) in dataframeApp.iteritems():
 
 worksheet.autofilter(START, START, ROW - 1 , COL - 1)
 
-worksheet = workbook.add_worksheet('AppFinder_Graph')
+worksheet = workbook.add_worksheet('Graph')
 worksheet.set_column(0,10,30)
 
 dataframeGraph = dataframeApp.groupby('category').count()['key'].reset_index(name="count")
@@ -134,8 +113,8 @@ pie_chart = workbook.add_chart({'type': 'pie'})
 
 pie_chart.add_series({
     'name': 'App_Finder_Breakdown',
-    'categories': '=AppFinder_Graph!$A$2:$A$' + str(ROW),
-    'values':     '=AppFinder_Graph!$B$2:$B$' + str(ROW),
+    'categories': '=Graph!$A$2:$A$' + str(ROW),
+    'values':     '=Graph!$B$2:$B$' + str(ROW),
 })
 
 pie_chart.set_style(18)

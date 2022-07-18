@@ -8,6 +8,10 @@ This is a project to handle examples of how to build MS Excel and Powerpoint fil
 
 * Examples for MS Powerpoint files
 
+This can be extended to other file types as well. 
+
+Combining all of the methods, a sample Client Report is provided in var also.
+
 Installing the Scripts
 =======================
 
@@ -49,7 +53,7 @@ Script Names and Purposes
 To Do List:
 ===========
 
-* Ensure we have samples for specific goals in addition to sample monolithic scripts
+* split out the individual functions into their own files in lib
 
 License
 =======
